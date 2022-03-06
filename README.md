@@ -57,5 +57,6 @@ At this point the app runs smoothly without problems and all pages or resources 
 In this recipe, we will see a simple method of adding authentication to our small app.
 
 ## Authorization setup
+We have seen how authentication feature was integrated into our mini app. Now lets add authorization feature to our app using same principles. To see this in action lets imagine a scenerio where everyday users in our app are allowed to see their details but not change them except they are admins.
 
 ## Conclusion
