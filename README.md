@@ -6,9 +6,11 @@ In this article, I will be showing you how this can be implemented using Nodejs.
 
 
 ## Prerequisites
+Before you get started you'll need the following:
+
 * Basic understanding of Express.js
 * A code editor (I'll be using VScode)
-* Baic knowledge of git and github to code along.
+* Basic knowledge of git and github to code along.
 
 ## Theory
 This concept of authentication and authorization in expressjs can be achieved easily using middleware functions.
@@ -22,7 +24,7 @@ This same idea for authenticating users can be applied to check if a user is aut
 Enough talks, now let's start coding and see this in action.
 
 ## Project setup
-To make things easier I made available some starter files if you would like to code along. Available at [github.com/SpiffGreen/Node_auth_tutorial](github.com/SpiffGreen/Node_auth_tutorial). The finished version lies on the `main` branch while the starter files are on the `starter` branch. To code along run the following commands in the command line. make sure to have git installed.
+To make things easier I made available some starter files if you would like to code along. Available at [github.com/SpiffGreen/node_auth_tutorial](github.com/SpiffGreen/node_auth_tutorial). The finished version lies on the `main` branch while the starter files are on the `starter` branch. To code along run the following commands in the command line. make sure to have git installed.
 
 ```sh
 # Clone start files to local machine
@@ -37,9 +39,16 @@ npm run dev
 ```
 
 ## Detailed look at the file structure
+Once everything has been installed as from the previous step, you'll have various files downloaded. Each file has it's purpose, each of these are explained below;
+* `package.json` and `package-lock.json` these files are used for dependency management, versioning, tracking and scripts
+* `server.js` contains code for ther server
+* `routes.js` in this file lies the route definitions passed to the server for handling routes
 
 ## Authentication setup
+At this point the app runs smoothly without problems and all pages or resources are available to anyone. But thats the problem, we don't want every route to be accessable to just anyone, we need to know who is accessing a resource on our application hence the need for `authentication`.
+
+In this recipe, we will see a simple method of adding authentication to our small app.
 
 ## Authorization setup
 
-## Conclusion# node_auth_tutorial
+## Conclusion
