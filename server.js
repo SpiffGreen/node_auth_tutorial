@@ -4,6 +4,9 @@ const PORT = process.env.PORT || 5000;
 const cookieParser = require("cookie-parser");
 const path = require("path");
 
+// initialise database
+require("./db")();
+
 // Settings
 app.set("view engine", "ejs");
 app.set('views', path.join(__dirname, "views"));
