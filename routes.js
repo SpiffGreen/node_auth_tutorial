@@ -1,15 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const { User } = require("./models");
-const { authenticate } = require("./util");
+const { authenticate, adminAuth, constants } = require("./util");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.JWT_SECRET || "secretkldjfal";
 
 // Index routenull
-router.get("/", authenticate, (req, res) => {
-    console.log(req.user);
-    res.render("index");
+router.get("/", authenticate, async (req, res) => {
+    const user = await User.findById(req.user.id);
+    res.render("index", { user });
 });
 
 router.get("/login", (req, res) => {
@@ -17,6 +17,7 @@ router.get("/login", (req, res) => {
 });
 
 router.get("/logout", (req, res) => {
+    res.clearCookie('token');
     res.redirect("/login");
 })
 
@@ -24,8 +25,9 @@ router.get("/register", (req, res) => {
     res.render("register", { message: undefined });
 });
 
-router.get("/admin", (req, res) => {
-    res.render("admin");
+router.get("/admin", authenticate, adminAuth([ constants.ADMIN_USER ]), async (req, res) => {
+    const user = await User.findById(req.user.id);
+    res.render("admin", { user });
 });
 
 router.get("*", (req, res) => {
@@ -44,7 +46,11 @@ router.post("/login", async (req, res) => {
             user: {id: user.id, role: user.role}
         }
         const token = jwt.sign(payload, JWT_SECRET);
-        console.log(token);
+        // console.log(token);
+        res.cookie('token', token, {
+            expires: new Date(Date.now() + 8 * 3600000), // cookie will be removed after 8 hours
+            httpOnly: true
+          });
         res.redirect("/");
     } catch (err) {
         console.log(err);
