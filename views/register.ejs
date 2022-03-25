@@ -1,1 +1,37 @@
-The registration page
+<!DOCTYPE html>
+<html lang="en">
+  <%- include("partials/head") -%>
+  <body>
+    <div class="container">
+      <div class="fs-3 text-center py-3">Sign Up</div>
+        <div class="alert alert-warning alert-dismissible fade show <%= typeof message === 'undefined' ? 'd-none' : 'd-block' %>" role="alert" >
+          <span><%= message %></span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      <form style="max-width: 300px" class="mx-auto pe-10" method="POST">
+        <input
+          type="text"
+          name="name"
+          class="form-control my-3"
+          placeholder="Full Name"
+        />
+        <input
+          type="text"
+          name="email"
+          class="form-control my-3"
+          placeholder="Email"
+        />
+        <input
+          type="password"
+          name="password"
+          class="form-control my-3"
+          placeholder="Password"
+        />
+        <p>
+          <button type="submit" class="btn btn-primary w-100">Login</button>
+        </p>
+        <p class="text-center p-3">Have an account? <a href="/login">Sign in</a> instead</p>
+      </form>
+    </div>
+  </body>
+</html>
