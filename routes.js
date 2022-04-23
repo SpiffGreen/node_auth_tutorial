@@ -4,9 +4,9 @@ const { User } = require("./models");
 const { authenticate, adminAuth, constants } = require("./util");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const JWT_SECRET = process.env.JWT_SECRET || "secretkldjfal";
+const JWT_SECRET = process.env.JWT_SECRET || "secret_key";
 
-// Index routenull
+// Index route
 router.get("/", authenticate, async (req, res) => {
     const user = await User.findById(req.user.id);
     res.render("index", { user });

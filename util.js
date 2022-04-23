@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const JWT_SECRET = process.env.JWT_SECRET || "secretkldjfal";
+const JWT_SECRET = process.env.JWT_SECRET || "secret_key";
 
 const constants = {
   ADMIN_USER: "ADMIN_USER",
@@ -15,6 +15,7 @@ const authenticate = async (req, res, next) => {
     next();
   } catch (err) {
     res.redirect("/login");
+    console.log(err);
   }
 };
 

@@ -1,62 +1,161 @@
-# Role Based Authorization in Nodejs
-
-You may have seen applications or programs that offer service to users based on the user's role or subscription package. A good scenario can be where accounts in a system are categorized into something like free, basic and premium accounts.
-
-In this article, I will be showing you how this can be implemented using Nodejs.
-
+You've probably encountered apps or programs that provide services to users based on their role or membership type.
+An excellent example is when a system's account types are divided into three categories: free, basic, and premium, where each account has certain privileges.
+In this article, we will see one way of using Nodejs to accomplish this.
 
 ## Prerequisites
 Before you get started you'll need the following:
-
-* Basic understanding of Express.js
-* A code editor (I'll be using VScode)
-* Basic knowledge of git and github to code along.
+- Basic understanding of Nodejs and Express.js
+- A code editor (I'll be using VScode)
+- Basic knowledge of git and github to code along(not necessary)
 
 ## Theory
-This concept of authentication and authorization in expressjs can be achieved easily using middleware functions.
-
-One might ask what is a middleware, well a `middleware` is simply a function. You could think of it as a function that processes requests before the final handler for the matched route does it's job and responds to the client who made the request.
-
-A sample use case of middlewares in relation to this topic is having a function(middleware) to check headers or body of a request for an authentication token which is verified by the server to authenticate the current user, i.e to know the current user who made the request. If the server can't authenticate the user the middleware can simply handle the request and send an authentication error back to the user, without the request getting to the client.
-
-This same idea for authenticating users can be applied to check if a user is authorized to use a particular resource. From the example I gave earlier we could add one more middleware that checks if the authenticated user has right to a resource using the users details.
-
+This concept of authentication and authorization in express.js can be achieved easily using middleware functions.
+One might ask what is a middleware, well a middleware is simply a function. You could think of it as a function that processes requests before the final handler for the matched route does its job and responds to the client who made the request.
+A sample use case of a middleware in relation to this topic is having a function(middleware) to check headers, cookies, or body of a request for an authentication token which is verified by the server to authenticate the current user, i.e to know the current user who made the request. If the server can't authenticate the user, the middleware can simply handle the request and send an authentication error back to the user, without the request getting to the final handler.
+This same idea for authenticating users can be applied to check if a user is authorized to use a particular resource after authentication.
 Enough talks, now let's start coding and see this in action.
 
 ## Project setup
-To make things easier I made available some starter files if you would like to code along. Available at [github.com/SpiffGreen/node_auth_tutorial](github.com/SpiffGreen/node_auth_tutorial). The finished version lies on the `main` branch while the starter files are on the `starter` branch. To code along run the following commands in the command line. make sure to have git installed.
+To make things easier I made available some starter files if you would like to code along. Available at [github.com/SpiffGreen/node_auth_tutorial](github.com/spiffgreen/node_auth_tutorial). The finished version lies on the main branch while the starter files are on the starter branch. To code along, run the following commands in the command line. make sure to have git installed.
 
 ```sh
 # Clone start files to local machine
 git clone https://github.com/SpiffGreen/node_auth_tutorial
 cd node_auth_tutorial
 
+# use starter files or skip this next line
+git checkout starter
+
 # Install app dependencies
 npm install
 
-# Run app in develoment mode
+# Run app in development mode
 npm run dev
 ```
 
 ## Detailed look at the folder structure
-Once everything has been installed as from the previous step, you'll have various files downloaded. Each file has it's purpose, each of these are explained below;
-* `package.json` and `package-lock.json` these files are used for dependency management, versioning, tracking and scripts
-* `server.js` This file contains code for ther server
-* `routes.js` In this file lies the route definitions passed to the server for handling routes.
-* `utils.js` This includes contants and/or functions we will use in building our mini-application.
-* `db.js` This file exports a function for connecting to the database.
-* `models.js` This file exports models used in the application.
-* `node_modules` This is generated by the npm install command. It contains files need for the application to function i.e code files for the apps dependencies.
-* `views` This folder contains ejs files to which are compiled and sent to the user as html.
-
-I made everything simple enough just anyone whether a beginner or intermediate user can follow along.
+Once everything has been installed as from the previous step, you'll have various files downloaded. Each file has its purpose, each of these are explained below;
+- `package.json` and `package-lock.json` these files are used for dependency management, versioning, tracking and scripts
+- `server.js` This file contains code for the server
+- `routes.js` In this file lies the route definitions passed to the server for handling routes.
+- `utils.js` This includes constants and/or functions we will use in building our mini-application.
+- `db.js` This file exports a function for connecting to the database.
+- `models.js` This file exports models used in the application.
+- `node_modules` This is generated by the npm install command. It contains files needed for the application to function i.e code files for libraries the app is dependent on.
+`views` This folder contains ejs files, which are compiled and sent to the user as html.
+I made everything simple enough so just anyone whether a beginner or intermediate developer can follow along.
 
 ## Authentication setup
-At this point the app runs smoothly without problems and all pages or resources are available to anyone. But thats the problem, we don't want every route to be accessable to just anyone, we need to know who is accessing a resource on our application hence the need for `authentication`.
-
+At this point, the app runs smoothly without problems and all pages or resources are available to anyone. But that's the problem, we don't want every route to be accessible to just anyone, we need to know who is accessing a resource on our application hence the need for authentication.
 In this recipe, we will see a simple method of adding authentication to our small app.
+Like I said earlier, these features can be implemented cleanly with the help of middleware, lets see a simple example below:
+
+```js
+function authenticate(req, res, next) {
+    console.log(req.url);
+    next();
+}
+app.get(“/testpage”, authenticate, (req, res) => res.send(“This is the test page”));
+``` 
+From the above, we have a route `/testpage` with a middleware that runs anytime the route is visited. A middleware is passed three arguments, the first being an object describing the request, a response object with methods for handling the response to the request, and finally, a function usually called next which when called tells expressjs to move to the next function to be executed if any. So when a user visits the route defined in the code above, the authenticate function is called, which prints the url to the console, then calls the`next` function hence, moving execution to the next function to be executed, which sends a text that prints 'This is the test page' as output.
+
+So, knowing this we could implement an Auth system that will check headers or cookies in every request for an authentication token, which will be validated by the server. In our project setup, we will be generating JSON web tokens, which will be placed in a cookie called ‘token’. Thankfully cookies are not stored on the server but on the client's browser only unlike sessions that are stored both on server and client.
+
+For implementing the login feature our code should look something like this
+
+
+
+```js
+router.post("/login", async (req, res) => {
+    const { password, email } = req.body;
+    try {
+        const user = await User.findOne({ email });
+        if(!user) return res.render("login", { message: "User doesn't exist" });
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if(!isMatch) return res.render("login", { message: "Invalid Credential" });
+        const payload = {
+            user: {id: user.id, role: user.role}
+        }
+        const token = jwt.sign(payload, JWT_SECRET);
+        // console.log(token);
+        res.cookie('token', token, {
+            expires: new Date(Date.now() + 8 * 3600000), // cookie will be removed after 8 hours
+            httpOnly: true
+          });
+        res.redirect("/");
+    } catch (err) {
+        console.log(err);
+        res.render("login", { message: err.message });
+    }
+});
+``` 
+In the above code, we used data submitted on the login page to first find the user, if the user is not found, quickly respond with a message letting the user know the details provided are incorrect. Else, move on by comparing the stored user password with the unhashed password that was passed through the login form, and if they match, generate a JSON web token with a payload containing detail of the user for identifying the user later.
+
+Now, for authenticating users upon visiting protected routes, i.e routes that shouldn't be visible to just anyone, we provide a function exported from `utils.js` file that serves as a middleware for authenticating users.
+
+```js
+const jwt = require("jsonwebtoken");
+const JWT_SECRET = process.env.JWT_SECRET || "secret_key";
+
+module.exports.constants = {
+  ADMIN_USER: "ADMIN_USER",
+  BASIC_USER: "BASIC_USER",
+};
+
+module.exports.authenticate = async (req, res, next) => {
+  if (!req.cookies.token) return res.status(401).redirect("/login");
+
+  try {
+    const decoded = jwt.verify(req.cookies.token, JWT_SECRET);
+    req.user = decoded.user;
+    next();
+  } catch (err) {
+    res.redirect("/login");
+  }
+};
+``` 
+In the authenticate function, we first check to see if a cookie called token is present. If it isn't the client is redirected to the login page. Then, if the token is present we verify the token using our secret jwt key used in generating the token, the returned value (the payload) is then added to the request object for easy use while processing the request. Note: We have to call the next function for execution to be moved to the next handler.
+
+At this point, the middleware can be applied to routes whose content needs to be protected from unauthenticated users, for example, making the root route private would be like the code below.
+
+```js
+router.get("/", authenticate, async (req, res) => {
+    const user = await User.findById(req.user.id);
+    res.render("index", { user });
+});
+``` 
+In the above, you see we passed in the authenticate function before the last handler. You can explore more by trying it yourself creating more protected routes too. Next, we'll see how to set up authorization using a similar approach.
 
 ## Authorization setup
-We have seen how authentication feature was integrated into our mini app. Now lets add authorization feature to our app using same principles. To see this in action lets imagine a scenerio where everyday users in our app are allowed to see their details but not change them except they are admins.
+We have seen how the authentication feature was integrated into our mini-app. Now let's add authorization features to our app using the same principles. To see this in action let's imagine a scenario where everyday users in our app are allowed to see their details but not change them except their account type is that of an admin. Let's see a simple function written to handle a thing like this.
+```js
+const adminAuth = (allowedRoles) => (req, res, next) => {
+  let allowed = false;
+  allowedRoles.forEach(i => {
+    if(req?.user?.role === i) {
+      allowed = true;
+    }
+  });
+  if(!allowed) return res.render("error", { message: "You don't have enough priviledge to view this resource." });
+  next();
+}
+```
+From the code above, we have a higher order function, that takes in an array and returns a function, the actual middleware. The array passed in is a list of roles allowed for that route. The logic for this is baked into the function returned, which is then used as a middleware.
+
+### Using the auth utility function
+With the adminAuth function we will have a guard put in place to prevent unauthorized access to protected routes. The way it works is that since the payload placed in the token from the cookie contains both user id and user role, the function `adminAuth` in this case returns a function that loops through the array of allowed routes and if any matches that of the role of the user who made the request the next function is called, that is the process is allowed to continue, else it is immediately interrupted and the user is notified of the permissions required.
+
+We can apply this now to the `/admin` route so it's content is only visible to admin accounts. The `/admin` route definition then looks like this;
+
+```js
+router.get("/admin", authenticate, adminAuth([ "ADMIN_USER" ]), async (req, res) => {
+    const user = await User.findById(req.user.id);
+    res.render("admin", { user });
+});
+```
+I used an array for this to allow for instances when theres more account types having privileges at different levels. So, what happens behind the scene is that once a GET request is made to `/admin` on our server the authenticate middleware runs and if authenticated, execution is passed on to the function returned by adminAuth, since adminAuth function is called right inside of the route definition.
 
 ## Conclusion
+That's all for now, I hope with the little knowledge I've shared you've learned something new.
+Tihs might be a bit tricky at first but is something you'll come to understand. And once understood can be implemented in other programming languages as well.
